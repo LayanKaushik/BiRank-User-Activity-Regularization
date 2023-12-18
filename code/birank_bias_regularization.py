@@ -4,13 +4,12 @@ import numpy as np
 import scipy
 import scipy.sparse as spa
 
-def birank_with_regularization(W, user_activity, gamma=0.1, normalizer='BiRank', alpha=0.85, beta=0.85, max_iter=200, tol=1.0e-4, verbose=False):
+def birank_with_regularization(W, gamma=0.01, normalizer='BiRank', alpha=0.85, beta=0.85, max_iter=200, tol=1.0e-4, verbose=False):
     """
     BiRank with user activity regularization integrated into the iterative process.
 
     Inputs:
         W::scipy's sparse matrix: Adjacency matrix of the bipartite network
-        user_activity::numpy.ndarray: Vector of user activity levels
         gamma::float: Regularization strength
         normalizer::string: Choose which normalizer to use
         alpha, beta::float: Damping factors for the rows and columns
@@ -55,11 +54,14 @@ def birank_with_regularization(W, user_activity, gamma=0.1, normalizer='BiRank',
     p0 = np.repeat(1 / W.shape[1], W.shape[1])
     p_last = p0.copy()
 
+    # Calculate user activity as the degree of each user divided by the sum of degrees of all users
+    total_degree = Kd.sum()
+    user_activity = Kd / total_degree
     # Regularization factor (1e-6 is added to avoid division by zero)
     r = gamma / (user_activity + 1e-6)
 
     for i in range(max_iter):
-        d = (alpha * Sd.dot(p_last) + (1 - alpha) * d0) * r
+        d = alpha * Sd.dot(p_last)* r + (1 - alpha) * d0
         p = alpha * Sp.dot(d) + (1 - alpha) * p0
 
         # Re-normalize after applying regularization
