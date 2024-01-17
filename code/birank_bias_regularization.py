@@ -61,7 +61,7 @@ def birank_with_regularization(W, gamma=0.01, normalizer='BiRank', alpha=0.85, b
     r = gamma / (user_activity + 1e-6)
 
     for i in range(max_iter):
-        d = alpha * Sd.dot(p_last)* r + (1 - alpha) * d0
+        d = (alpha * Sd.dot(p_last) + (1 - alpha) * d0)* r
         p = alpha * Sp.dot(d) + (1 - alpha) * p0
 
         # Re-normalize after applying regularization
